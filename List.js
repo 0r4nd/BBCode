@@ -310,7 +310,7 @@ var [List,ListNode] = (function() {
     var first = this.first;
     var pnew = new ListNode(data);
 
-    this.first = pnew; // only this line differt than pushLast()
+    this.first = pnew;
     if (!first) {
       pnew.prev = pnew;
       pnew.next = pnew;
