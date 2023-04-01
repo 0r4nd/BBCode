@@ -1,10 +1,36 @@
 BBCode parsing library (customisable)
 =====================
 
-Result:
+BBCode standard tags (can be custom, see exemple below)
 ---------------------
-BBCODE to HTML TESTS:<br><br>- this is a <span style="font-weight: bold;">bold </span><span style="font-weight: bold;text-decoration: underline;">underlined, </span><span style="font-weight: bold;color:blue;text-decoration: underline;">blue</span><span style="font-weight: bold;text-decoration: underline;"> and </span><span style="font-weight: bold;color:red;text-decoration: underline;">red</span> <span style="font-size:200%;">big text</span><br>- <span style="font-family:Impact;">this is 'Impact' font </span><span style="color:rgb(255,0,0);"> red </span><span style="font-style: italic;color:rgb(255,0,0);">italic text</span> 
+Size: [size=150%]test[/size] or [size=24px]test[/size] <br>
+Family: [font=Autumn]test[/font]<br>
+Color: [color=red]test[/color]<br>
+Bold: [b]test[/b]<br>
+Italic: [i]test[/i]<br>
+Underline: [u]test[/u]<br>
+ Overline: [o]test[/o]<br>
+Strikethrough: [s]test[/s]<br>
 
-Methods:
+BBCode.html() function
 ---------------------
-soon... (la librairie a un petit bug, bientot corrigé)
+Description: Basic bbcode to html
+
+Exemple:
+```javascript
+BBCode.html("- [font=Impact]this is 'Impact' font [/font][color=rgb(255,0,0)] red [i]italic text[/i][/color] ");
+```
+
+Result:
+```javascript
+"- <span style="font-family:Impact;">this is 'Impact' font </span><span style="color:rgb(255,0,0);"> red </span><span style="font-style: italic;color:rgb(255,0,0);">italic text</span>"
+```
+
+BBCode.log() function
+---------------------
+Description: Show html on the console!
+
+Exemple:
+```javascript
+BBCode.log("- [font=Impact]this is 'Impact' font [/font][color=rgb(255,0,0)] red [i]italic text[/i][/color] ");
+```
