@@ -17,7 +17,6 @@ Standard tags (can be custom, see exemple below)
 | Strikethrough | [s]test[/s] |
 
 
-
 BBCode.html() function
 ---------------------
 Description: Basic bbcode to html
