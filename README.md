@@ -3,14 +3,20 @@ BBCode parsing library (customisable)
 
 BBCode standard tags (can be custom, see exemple below)
 ---------------------
-Size: [size=150%]test[/size] or [size=24px]test[/size] <br>
-Family: [font=Autumn]test[/font]<br>
-Color: [color=red]test[/color]<br>
-Bold: [b]test[/b]<br>
-Italic: [i]test[/i]<br>
-Underline: [u]test[/u]<br>
- Overline: [o]test[/o]<br>
-Strikethrough: [s]test[/s]<br>
+
+
+| tag             | exemple      |
+|:------------------|:------------|
+| Size | [size=150%]test[/size] or [size=24px]test[/size] |
+| Family | [font=Autumn]test[/font] |
+| Color | [color=red]test[/color] |
+| Bold | [b]test[/b] |
+| Italic | [i]test[/i] |
+| Underline | [u]test[/u] |
+| Overline | [o]test[/o] |
+| Strikethrough | [s]test[/s] |
+
+
 
 BBCode.html() function
 ---------------------
