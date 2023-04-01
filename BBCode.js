@@ -1,11 +1,7 @@
 
 
 
-/**
- * BBCode Module
- */
 const BBCode = (function() {
-
 
   /* 
    * BBCode main class
@@ -145,8 +141,8 @@ const BBCode = (function() {
     // cherche la balise fermante
     ts.close.left = ts.open.right;
     ts.close.right = ts.open.right;
-    for (i = text.length; i > ts.open.right+1; --i) {
-    //for (i = ts.open.right+1; i < text.length; ++i) {
+    //for (i = text.length; i > ts.open.right+1; --i) {
+    for (i = ts.open.right+1; i < text.length; ++i) {
       if (text[i] !== '[') continue;
       var orig = i;
       ts.close.leftBracket = i;
@@ -169,9 +165,13 @@ const BBCode = (function() {
 
       if (ts.close.right >= 0) {
         if (openTag == ts.closeTag()) {
+          // DEBUG:
           //console.log("trouvé:", text.substring(ts.open.left,ts.open.right),
           //                       text.substring(ts.open.leftBracket,ts.close.rightBracket));
-          console.log(ts.openTag(), ts.text, ts.attribute, ts.closeTag())
+          //console.log('(openTag)"'+ts.openTag()+'"')
+          //console.log('(text)"'+ts.text+'"')
+          //console.log('(attribute)"'+ts.attribute+'"')
+          //console.log('(closeTag)"'+ts.closeTag()+'"')
           return ts;
         }
         //console.log("pas trouvé", closeTag);
@@ -186,14 +186,10 @@ const BBCode = (function() {
   }
 
 
-
-
   //const clone = o => Object.assign({},o)
   const cloneDeep = o => JSON.parse(JSON.stringify(o))
 
-  /*
-  tags: accumulation de tous les tags en provenence des ascendants.
-  */
+  // tags: accumulation de tous les tags en provenence des ascendants.
   function fillTree(text, index, bbtags, tags, node) {
     if (!node) return;
     var child, tagSection, textSection, first = index;
@@ -205,7 +201,7 @@ const BBCode = (function() {
 
         if (tagSection) {
           // si la tag section est valide, ça signifie que le texte avant
-          // peut-être ajouté dans le scope courant.
+          // peut être ajouté dans le scope courant.
           if (i !== first) {
             textSection = new TagSection(text, {rightBracket:first}, {leftBracket:i});
             textSection.tags = tags;
@@ -214,8 +210,6 @@ const BBCode = (function() {
           }
 
 
-
-///////////////////////////////////////////////////////////////////////
           //tagSection.tags = clone(tags);
           var tagsNew = cloneDeep(tags);
           var openTag = tagSection.openTag();
@@ -226,8 +220,6 @@ const BBCode = (function() {
             tagsNew[openTag] = {depth:0, attribute:tagSection.attribute};
           }
           tagSection.tags = tagsNew;
-////////////////////////////////////////////////////////////////////////
-
 
           //console.log("tag(1): " + tagSection.fullSection() );
           child = node.addChilds(tagSection)[0];
@@ -364,7 +356,8 @@ const BBCode = (function() {
   };
 
 
-  BBCode.html = function(text, bbtags = {b:{},i:{},u:{},s:{},o:{}}) {
+  BBCode.html = function(text, bbtags) {
+    bbtags = bbtags || BBCode.BBTAGS_DEFAULT;
     var bbcode = new BBCode(text, bbtags);
     var res = bbcode.reduce(
         (total,data) => {
@@ -378,6 +371,26 @@ const BBCode = (function() {
           var fontStyle = "";
           if (data.tags['i']) { hasStyle++; fontStyle += " italic"; }
 
+          // color (for font color)
+          var color = "";
+          if (data.tags['color']) {
+            hasStyle++;
+            color += data.tags['color'].attribute;
+          }
+
+          // size
+          var fontSize = "";
+          if (data.tags['size']) {
+            hasStyle++;
+            fontSize += data.tags['size'].attribute;
+          }
+
+          // family
+          var fontFamily = "";
+          if (data.tags['font']) {
+            hasStyle++;
+            fontFamily += data.tags['font'].attribute;
+          }
 
           // text-decoration
           var textDeco = "";
@@ -389,6 +402,9 @@ const BBCode = (function() {
             var span = '<span style="';
             if (fontWeight.length) span += 'font-weight:' + fontWeight + ';';
             if (fontStyle.length) span += 'font-style:' + fontStyle + ';';
+            if (color.length) span += 'color:' + color + ';';
+            if (fontSize.length) span += 'font-size:' + fontSize + ';';
+            if (fontFamily.length) span += 'font-family:' + fontFamily + ';';
             if (textDeco.length) span += 'text-decoration:' + textDeco + ';';
             span += '">';
             total += span + data.text + "</span>";
@@ -400,6 +416,7 @@ const BBCode = (function() {
         }, "");
 
     return res;
+    
   };
 
   return BBCode;
