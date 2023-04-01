@@ -1,7 +1,7 @@
 BBCode parsing library (customisable)
 =====================
 
-BBCode standard tags (can be custom, see exemple below)
+Standard tags (can be custom, see exemple below)
 ---------------------
 
 
