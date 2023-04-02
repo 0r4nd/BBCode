@@ -287,33 +287,37 @@ const BBCode = (function() {
   // Underline: [u]test[/u]
   // Overline: [o]test[/o]
   // Strikethrough: [s]test[/s]
-  function console_callback(ctx,data) {
-    var style = ctx.style.concat("");
-    var len = style.length-1;
-    var span = '';
-
+  function bb_to_html(text, data) {
     if (data.tags['color']) {
-      span += 'color:' + data.tags['color'].attribute + ';';
+      text += 'color:' + data.tags['color'].attribute + ';';
     }
     if (data.tags['size']) {
-      span += 'font-size:' + data.tags['size'].attribute + ';';
+      text += 'font-size:' + data.tags['size'].attribute + ';';
     }
     if (data.tags['font']) {
-      span += 'font-family:' + data.tags['font'].attribute + ';';
+      text += 'font-family:' + data.tags['font'].attribute + ';';
     }
-    if (data.tags['b']) span += 'font-weight:bold;';
-    if (data.tags['i']) span += 'font-style:italic;';
+    if (data.tags['b']) text += 'font-weight:bold;';
+    if (data.tags['i']) text += 'font-style:italic;';
 
     // text-decoration
     if (data.tags['u'] || data.tags['o'] || data.tags['s']) {
-      span += 'text-decoration:';
-      if (data.tags['u']) span += " underline";
-      if (data.tags['o']) span += " overline";
-      if (data.tags['s']) span += " line-through";
-      span += ';';
+      text += 'text-decoration:';
+      if (data.tags['u']) text += " underline";
+      if (data.tags['o']) text += " overline";
+      if (data.tags['s']) text += " line-through";
+      text += ';';
     }
+    return text;
+  }
 
-    if (span.length > 0) style[len] += span;
+
+  function console_callback(ctx,data) {
+    var style = ctx.style.concat("");
+    var len = style.length-1;
+    var text = bb_to_html("", data);
+
+    if (text.length > 0) style[len] += text;
     if (style[len] === "" && ((len-1) < 0 || style[len-1] === "")) {
       ctx.text += data.text;
     } else {
@@ -322,35 +326,12 @@ const BBCode = (function() {
     }
     return ctx;
   };
-
-
   function html_callback(ctx,data) {
-    var span = '<span style="';
+    var text = bb_to_html('<span style="', data);
 
-    if (data.tags['color']) {
-      span += 'color:' + data.tags['color'].attribute + ';';
-    }
-    if (data.tags['size']) {
-      span += 'font-size:' + data.tags['size'].attribute + ';';
-    }
-    if (data.tags['font']) {
-      span += 'font-family:' + data.tags['font'].attribute + ';';
-    }
-    if (data.tags['b']) span += 'font-weight:bold;';
-    if (data.tags['i']) span += 'font-style:italic;';
-
-    // text-decoration
-    if (data.tags['u'] || data.tags['o'] || data.tags['s']) {
-      span += 'text-decoration:';
-      if (data.tags['u']) span += " underline";
-      if (data.tags['o']) span += " overline";
-      if (data.tags['s']) span += " line-through";
-      span += ';';
-    }
-
-    if (span.length > 0) {
-      span += '">';
-      ctx += span + data.text + "</span>";
+    if (text.length > 0) {
+      text += '">';
+      ctx += text + data.text + "</span>";
     } else {
       ctx += data.text;
     }
