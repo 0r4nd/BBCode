@@ -127,7 +127,6 @@ const BBCode = (function() {
       return null;
     }
 
-
     // search for closed tag
     ts.close.left = ts.open.right;
     ts.close.right = ts.open.right;
@@ -209,7 +208,6 @@ const BBCode = (function() {
             tagsNew[openTag] = {depth:0, attribute:tagSection.attribute};
           }
           tagSection.tags = tagsNew;
-
           //console.log("tag(1): " + tagSection.fullSection() );
           child = node.addChilds(tagSection)[0];
           fillTree(text.substring(0,tagSection.close.leftBracket),
@@ -333,7 +331,6 @@ const BBCode = (function() {
 
   function html_callback(ctx,data) {
     var parsed = bb_to_html('<span style="', data);
-
     if (parsed.length > 0) {
       parsed += '">';
       ctx += parsed + data.text + "</span>";
@@ -347,15 +344,11 @@ const BBCode = (function() {
     var canvasCtx = ctx.canvas.getContext("2d");
     var parsed = bb_to_canvasFont("", data, ctx);
 
-    if (parsed.length > 0) {
-      if (data.tags['color']) canvasCtx.fillStyle = data.tags['color'].attribute;
-      else canvasCtx.fillStyle = "black";
-      canvasCtx.font = parsed;
-      canvasCtx.fillText(data.text, ctx.x,ctx.y);
-    } else {
-      //ctx.text += data.text;
-      canvasCtx.fillText(data.text, ctx.x,ctx.y);
-    }
+    if (data.tags['color']) canvasCtx.fillStyle = data.tags['color'].attribute;
+    else canvasCtx.fillStyle = "black";
+    canvasCtx.font = parsed;
+    canvasCtx.fillText(data.text, ctx.x,ctx.y);
+
     ctx.x += canvasCtx.measureText(data.text).width;
     return ctx;
   };
