@@ -1,8 +1,6 @@
 
-
 /**
  * Double Linked List Class
- * En interne la librairie utilise une liste chainée de type "circular"
  */
 var [List,ListNode] = (function() {
    "use strict";
@@ -107,7 +105,7 @@ var [List,ListNode] = (function() {
     return !this.first;
   };
 
-  // Returns the hash code value for this list. (TODO)
+  // Returns the hash code value for this list.
   List.prototype.hashCode = function() {
     return 0;
   };
@@ -308,7 +306,7 @@ var [List,ListNode] = (function() {
     var first = this.first;
     var pnew = new ListNode(data);
 
-    this.first = pnew;
+    this.first = pnew; // only this line differt than pushLast()
     if (!first) {
       pnew.prev = pnew;
       pnew.next = pnew;
@@ -427,6 +425,3 @@ var [List,ListNode] = (function() {
 
   return [List,ListNode];
 })();
-
-
-

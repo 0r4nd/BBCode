@@ -394,7 +394,7 @@ const BBCode = (function() {
     return BBCode.parse(text, BBCode.TAGS_DEFAULT, html_callback, "");
   };
 
-  BBCode.canvasText = function(text, canvas, opts={}) {
+  BBCode.fillCanvas = function(text, canvas, opts={}) {
     opts.x = opts.x || 10;
     opts.y = opts.y || 10;
     opts.size = opts.size || 10;
