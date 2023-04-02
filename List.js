@@ -1,7 +1,5 @@
 
 
-
-
 /**
  * Double Linked List Class
  * En interne la librairie utilise une liste chainée de type "circular"
