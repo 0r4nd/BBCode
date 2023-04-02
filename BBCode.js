@@ -1,12 +1,9 @@
 
-
-
-
 const BBCode = (function() {
 
   const DEBUG = false;
 
-  /* 
+  /**
    * BBCode main class
    */ 
   function BBCode(text, bbtags = {}) {
@@ -17,12 +14,10 @@ const BBCode = (function() {
     this.create();
   }
 
-
   const skipSpaces = (text,i) => {
     while (i < text.length && (text[i] === " " || text[i] === "\t")) ++i;
     return i;
   };
-
 
   // var text = "[b]hey[/b]";
   // var section = new Section();
@@ -80,9 +75,7 @@ const BBCode = (function() {
     return JSON.stringify(this.tags);
   };
 
-
-
-  // [b] hey [b]ça va[/b] bien[/b]
+  // [b]1[b]2[/b]3[/b]
   function extractTagSection(text, bbtags, i = 0) {
     if (text[i] !== "[") return null;
     var ts = new TagSection(text);
@@ -97,7 +90,7 @@ const BBCode = (function() {
       return null;
     }
 
-    // récupère l'ouverture de la balise
+    // search for open tag
     for (; i < text.length; i = skipSpaces(text,i+1)) {
       c = text[i];
       if (c === '[') break;
@@ -135,7 +128,7 @@ const BBCode = (function() {
     }
 
 
-    // cherche la balise fermante
+    // search for closed tag
     ts.close.left = ts.open.right;
     ts.close.right = ts.open.right;
     //for (i = text.length; i > ts.open.right+1; --i) {
@@ -158,7 +151,6 @@ const BBCode = (function() {
           break;
         }
       }
-
 
       if (ts.close.right >= 0) {
         if (openTag == ts.closeTag()) {
@@ -206,7 +198,6 @@ const BBCode = (function() {
             //console.log("text(1):" + textSection.fullSection());
             child = node.addChilds(textSection)[0];
           }
-
 
           //tagSection.tags = clone(tags);
           var tagsNew = cloneDeep(tags);
@@ -354,16 +345,9 @@ const BBCode = (function() {
 
   function canvas_callback(ctx,data) {
     var canvasCtx = ctx.canvas.getContext("2d");
-    var style = ctx.style.concat("");
-    var len = style.length-1;
     var parsed = bb_to_canvasFont("", data, ctx);
-    console.warn(parsed, data.text)
 
-    //ctx.fillStyle = "red";
     if (parsed.length > 0) {
-      //ctx.text += "%c" + data.text;
-      //ctx.font = "bold 48px serif";
-      //ctx.style = style;
       if (data.tags['color']) canvasCtx.fillStyle = data.tags['color'].attribute;
       else canvasCtx.fillStyle = "black";
       canvasCtx.font = parsed;
@@ -400,12 +384,7 @@ const BBCode = (function() {
     opts.size = opts.size || 10;
     var ctx = {text:"", style:[], canvas, x:opts.x,y:opts.x, size:opts.size};
     BBCode.parse(text, BBCode.TAGS_DEFAULT, canvas_callback, ctx);
-    //callback_log(ctx.text, ...ctx.style);
   };
-
-
-  //ctx.fillText("Draw text on Canvas", 10, 30);
-
 
   return BBCode;
 })();
