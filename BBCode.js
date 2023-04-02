@@ -287,142 +287,6 @@ const BBCode = (function() {
   // Underline: [u]test[/u]
   // Overline: [o]test[/o]
   // Strikethrough: [s]test[/s]
-  /*
-  BBCode.log = function(text, bbtags) {
-    bbtags = bbtags || BBCode.TAGS_DEFAULT;
-    var bbcode = new BBCode(text, bbtags);
-    var res = bbcode.reduce(
-        (total,data) => {
-          var style = total.style.concat("");
-          var len = style.length-1;
-          var hasStyle = 0;
-
-          // color (for font color)
-          var color = "";
-          if (data.tags['color']) {
-            hasStyle++;
-            color += data.tags['color'].attribute;
-          }
-
-
-          // size
-          var fontSize = "";
-          if (data.tags['size']) {
-            hasStyle++;
-            fontSize += data.tags['size'].attribute;
-          }
-
-          // family
-          var fontFamily = "";
-          if (data.tags['font']) {
-            hasStyle++;
-            fontFamily += data.tags['font'].attribute;
-          }
-
-          // font-weight
-          var fontWeight = "";
-          if (data.tags['b']) { hasStyle++; fontWeight += " bold"; }
-          
-          // font-style
-          var fontStyle = "";
-          if (data.tags['i']) { hasStyle++; fontStyle += " italic"; }
-
-          // text-decoration
-          var textDeco = "";
-          if (data.tags['u']) { hasStyle++; textDeco += " underline"; }
-          if (data.tags['o']) { hasStyle++; textDeco += " overline"; }
-          if (data.tags['s']) { hasStyle++; textDeco += " line-through"; }
-
-          var span = '';
-          if (hasStyle) {
-            if (fontWeight.length) span += 'font-weight:' + fontWeight + ';';
-            if (fontStyle.length) span += 'font-style:' + fontStyle + ';';
-            if (color.length) span += 'color:' + color + ';';
-            if (fontSize.length) span += 'font-size:' + fontSize + ';';
-            if (fontFamily.length) span += 'font-family:' + fontFamily + ';';
-            if (textDeco.length) span += 'text-decoration:' + textDeco + ';';
-            style[len] += span;
-          }
-
-          if (style[len] === "" && ((len-1) < 0 || style[len-1] === "")) {
-            total.text += data.text;
-          } else {
-            total.style = style;
-            total.text += "%c" + data.text;
-          }
-
-          return total;
-      }, {text:"", style:[]});
-    
-    console.log(res.text, ...res.style);
-  };
-*/
-
-
-  BBCode.html = function(text, bbtags) {
-    bbtags = bbtags || BBCode.TAGS_DEFAULT;
-    var bbcode = new BBCode(text, bbtags);
-    var res = bbcode.reduce(
-        (total,data) => {
-          var hasStyle = 0;
-
-          // font-weight
-          var fontWeight = "";
-          if (data.tags['b']) { hasStyle++; fontWeight += " bold"; }
-          
-          // font-style
-          var fontStyle = "";
-          if (data.tags['i']) { hasStyle++; fontStyle += " italic"; }
-
-          // color (for font color)
-          var color = "";
-          if (data.tags['color']) {
-            hasStyle++;
-            color += data.tags['color'].attribute;
-          }
-
-          // size
-          var fontSize = "";
-          if (data.tags['size']) {
-            hasStyle++;
-            fontSize += data.tags['size'].attribute;
-          }
-
-          // family
-          var fontFamily = "";
-          if (data.tags['font']) {
-            hasStyle++;
-            fontFamily += data.tags['font'].attribute;
-          }
-
-          // text-decoration
-          var textDeco = "";
-          if (data.tags['u']) { hasStyle++; textDeco += " underline"; }
-          if (data.tags['o']) { hasStyle++; textDeco += " overline"; }
-          if (data.tags['s']) { hasStyle++; textDeco += " line-through"; }
-
-          if (hasStyle) {
-            var span = '<span style="';
-            if (fontWeight.length) span += 'font-weight:' + fontWeight + ';';
-            if (fontStyle.length) span += 'font-style:' + fontStyle + ';';
-            if (color.length) span += 'color:' + color + ';';
-            if (fontSize.length) span += 'font-size:' + fontSize + ';';
-            if (fontFamily.length) span += 'font-family:' + fontFamily + ';';
-            if (textDeco.length) span += 'text-decoration:' + textDeco + ';';
-
-            span += '">';
-            total += span + data.text + "</span>";
-          } else {
-            total += data.text;
-          }
-
-          return total;
-        }, "");
-
-    return res;
-  };
-
-
   function console_callback(ctx,data) {
     var style = ctx.style.concat("");
     var len = style.length-1;
@@ -460,13 +324,63 @@ const BBCode = (function() {
   };
 
 
-  BBCode.parse = function(text, bbtags, callback, context) {
+  function html_callback(ctx,data) {
+    var span = '<span style="';
+
+    if (data.tags['color']) {
+      span += 'color:' + data.tags['color'].attribute + ';';
+    }
+    if (data.tags['size']) {
+      span += 'font-size:' + data.tags['size'].attribute + ';';
+    }
+    if (data.tags['font']) {
+      span += 'font-family:' + data.tags['font'].attribute + ';';
+    }
+    if (data.tags['b']) span += 'font-weight:bold;';
+    if (data.tags['i']) span += 'font-style:italic;';
+
+    // text-decoration
+    if (data.tags['u'] || data.tags['o'] || data.tags['s']) {
+      span += 'text-decoration:';
+      if (data.tags['u']) span += " underline";
+      if (data.tags['o']) span += " overline";
+      if (data.tags['s']) span += " line-through";
+      span += ';';
+    }
+
+    if (span.length > 0) {
+      span += '">';
+      ctx += span + data.text + "</span>";
+    } else {
+      ctx += data.text;
+    }
+    return ctx;
+  };
+
+
+  BBCode.parse = function(text, bbtags, callback, ctx) {
     bbtags = bbtags || BBCode.TAGS_DEFAULT;
     var bbcode = new BBCode(text, bbtags);
+    return bbcode.reduce((total,data) => callback(total, data), ctx);
+  };
 
-    var res = bbcode.reduce(
-        (total,data) => {
 
+
+  BBCode.log = function(text, callback_log = console.log) {
+    var ctx = {text:"",style:[]};
+    BBCode.parse(text, BBCode.TAGS_DEFAULT, console_callback, ctx);
+    callback_log(ctx.text, ...ctx.style);
+  };
+
+  BBCode.html = function(text) {
+    return BBCode.parse(text, BBCode.TAGS_DEFAULT, html_callback, "");
+  };
+
+  return BBCode;
+})();
+
+
+/*
           // custom tags
           //if (bbtags !== BBCode.TAGS_DEFAULT) {
             var keys = Object.keys(data.tags);
@@ -478,29 +392,11 @@ const BBCode = (function() {
               if (typeof value === 'function') {
                 //span += value(data.text, data_params.tags);
               }
-              /*if (typeof value.attribute === 'undefined') {
+              if (typeof value.attribute === 'undefined') {
                 
               } else {
                 hasStyle++;
-              }*/
+              }
             }
           //}
-          return callback(total, data);
-        }, context);
-
-    return res;
-  };
-
-
-
-  BBCode.log = function(text, bbtags) {
-    var context = {text:"",style:[]};
-    BBCode.parse(text, bbtags, console_callback, context);
-    console.log(context.text, ...context.style);
-  };
-
-
-  return BBCode;
-})();
-
-
+*/
