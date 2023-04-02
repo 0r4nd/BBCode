@@ -39,3 +39,9 @@ Exemple:
 ```javascript
 BBCode.log("- [font=Impact]this is 'Impact' font [/font][color=rgb(255,0,0)] red [i]italic text[/i][/color] ");
 ```
+
+BBCode.canvasText() function
+---------------------
+Description: Draw bbcode on a canvas
+
+
