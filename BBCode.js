@@ -287,6 +287,7 @@ const BBCode = (function() {
   // Underline: [u]test[/u]
   // Overline: [o]test[/o]
   // Strikethrough: [s]test[/s]
+  /*
   BBCode.log = function(text, bbtags) {
     bbtags = bbtags || BBCode.TAGS_DEFAULT;
     var bbcode = new BBCode(text, bbtags);
@@ -355,6 +356,7 @@ const BBCode = (function() {
     
     console.log(res.text, ...res.style);
   };
+*/
 
 
   BBCode.html = function(text, bbtags) {
@@ -399,25 +401,6 @@ const BBCode = (function() {
           if (data.tags['o']) { hasStyle++; textDeco += " overline"; }
           if (data.tags['s']) { hasStyle++; textDeco += " line-through"; }
 
-
-          // custom tags
-          if (bbtags !== BBCode.TAGS_DEFAULT) {
-            var keys = Object.keys(data.tags);
-            for (var i = 0; i < keys.length; i++) {
-              var key = keys[i];
-              var value = data.tags[key];
-              if (BBCode.TAGS_DEFAULT[key] !== 'undefined') continue;
-              console.warn("key:",  key);
-              if (typeof v.attribute === 'undefined') {
-
-              } else {
-
-              }
-            }
-          }
-
-
-
           if (hasStyle) {
             var span = '<span style="';
             if (fontWeight.length) span += 'font-weight:' + fontWeight + ';';
@@ -426,19 +409,96 @@ const BBCode = (function() {
             if (fontSize.length) span += 'font-size:' + fontSize + ';';
             if (fontFamily.length) span += 'font-family:' + fontFamily + ';';
             if (textDeco.length) span += 'text-decoration:' + textDeco + ';';
+
             span += '">';
             total += span + data.text + "</span>";
           } else {
             total += data.text;
           }
 
-
           return total;
         }, "");
 
     return res;
-    
   };
+
+
+  function console_callback(ctx,data) {
+    var style = ctx.style.concat("");
+    var len = style.length-1;
+    var span = '';
+
+    if (data.tags['color']) {
+      span += 'color:' + data.tags['color'].attribute + ';';
+    }
+    if (data.tags['size']) {
+      span += 'font-size:' + data.tags['size'].attribute + ';';
+    }
+    if (data.tags['font']) {
+      span += 'font-family:' + data.tags['font'].attribute + ';';
+    }
+    if (data.tags['b']) span += 'font-weight:bold;';
+    if (data.tags['i']) span += 'font-style:italic;';
+
+    // text-decoration
+    if (data.tags['u'] || data.tags['o'] || data.tags['s']) {
+      span += 'text-decoration:';
+      if (data.tags['u']) span += " underline";
+      if (data.tags['o']) span += " overline";
+      if (data.tags['s']) span += " line-through";
+      span += ';';
+    }
+
+    if (span.length > 0) style[len] += span;
+    if (style[len] === "" && ((len-1) < 0 || style[len-1] === "")) {
+      ctx.text += data.text;
+    } else {
+      ctx.style = style;
+      ctx.text += "%c" + data.text;
+    }
+    return ctx;
+  };
+
+
+  BBCode.parse = function(text, bbtags, callback, context) {
+    bbtags = bbtags || BBCode.TAGS_DEFAULT;
+    var bbcode = new BBCode(text, bbtags);
+
+    var res = bbcode.reduce(
+        (total,data) => {
+
+          // custom tags
+          //if (bbtags !== BBCode.TAGS_DEFAULT) {
+            var keys = Object.keys(data.tags);
+            for (var i = 0; i < keys.length; i++) {
+              var key = keys[i];
+              var value = data.tags[key];
+              //console.warn(key, typeof value)
+              //if (typeof BBCode.TAGS_DEFAULT[key] !== 'undefined') continue;
+              if (typeof value === 'function') {
+                //span += value(data.text, data_params.tags);
+              }
+              /*if (typeof value.attribute === 'undefined') {
+                
+              } else {
+                hasStyle++;
+              }*/
+            }
+          //}
+          return callback(total, data);
+        }, context);
+
+    return res;
+  };
+
+
+
+  BBCode.log = function(text, bbtags) {
+    var context = {text:"",style:[]};
+    BBCode.parse(text, bbtags, console_callback, context);
+    console.log(context.text, ...context.style);
+  };
+
 
   return BBCode;
 })();
