@@ -305,7 +305,7 @@ const BBCode = (function() {
     if (data.tags['i']) text += ' italic';
 
     if (data.tags['size']) text += ' ' + data.tags['size'].attribute;
-    else text += ' ' + ctx.size + 'px';
+    else text += ' ' + ctx.fontSize + 'px';
     
     if (data.tags['font']) text += ' ' + data.tags['font'].attribute;
     else text += ' sans-serif';
@@ -347,9 +347,23 @@ const BBCode = (function() {
     if (data.tags['color']) canvasCtx.fillStyle = data.tags['color'].attribute;
     else canvasCtx.fillStyle = "black";
     canvasCtx.font = parsed;
-    canvasCtx.fillText(data.text, ctx.x,ctx.y);
 
-    ctx.x += canvasCtx.measureText(data.text).width;
+
+    var words = data.text.split(' ');
+    for (var i = 0; i < words.length; i++) {
+      var word = words[i] + ((i>=words.length-1)?'':' ');
+      if (word.length == 0) continue;
+
+      var width = Math.floor(canvasCtx.measureText(word).width);
+      if (ctx.x + width >= ctx.width) {
+        ctx.x = ctx.xOrig;
+        ctx.y += ctx.fontSize;
+        if (word == ' ') continue;
+      }
+      canvasCtx.fillText(word, ctx.x,ctx.y);
+      ctx.x += width;
+    }
+
     return ctx;
   };
 
@@ -372,10 +386,16 @@ const BBCode = (function() {
   };
 
   BBCode.fillCanvas = function(text, canvas, opts={}) {
-    opts.x = opts.x || 10;
-    opts.y = opts.y || 10;
-    opts.size = opts.size || 10;
-    var ctx = {text:"", style:[], canvas, x:opts.x,y:opts.x, size:opts.size};
+    var ctx = {
+      text: "",
+      canvas: canvas,
+      x: opts.x || 10,
+      y: opts.y || 10,
+      xOrig: opts.x || 10,
+      yOrig: opts.y || 10,
+      fontSize: opts.fontSize || 10,
+      width: opts.width || canvas.width,
+    };
     BBCode.parse(text, BBCode.TAGS_DEFAULT, canvas_callback, ctx);
   };
 
