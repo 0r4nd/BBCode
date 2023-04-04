@@ -1,9 +1,8 @@
-BBCode parsing library (customisable)
+BBCode parsing library
 =====================
 
-Standard tags (can be custom, see exemple below)
+Standard tags (customisable)
 ---------------------
-
 
 | tag             | exemple      |
 |:------------------|:------------|
@@ -15,6 +14,7 @@ Standard tags (can be custom, see exemple below)
 | Underline | [u]test[/u] |
 | Overline | [o]test[/o] |
 | Strikethrough | [s]test[/s] |
+
 
 
 BBCode.html() function
