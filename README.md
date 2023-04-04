@@ -6,7 +6,7 @@ Standard tags (customisable)
 
 | tag             | exemple      |
 |:------------------|:------------|
-| Size | [size=150%]test[/size] or [size=24px]test[/size] |
+| Size | [size=150%]test[/size]<br>[size=24px] or [size=24] |
 | Family | [font=arial]test[/font] |
 | Color | [color=red]test[/color] |
 | Bold | [b]test[/b] |
