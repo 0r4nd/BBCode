@@ -1,20 +1,21 @@
-BBCode parsing library (customisable)
+BBCode parsing library
 =====================
 
-Standard tags (can be custom, see exemple below)
+Standard tags (customisable)
 ---------------------
-
 
 | tag             | exemple      |
 |:------------------|:------------|
-| Size | [size=150%]test[/size] or [size=24px]test[/size] |
-| Family | [font=Autumn]test[/font] |
+| Size | [size=150%]test[/size]<br>[size=24px] or [size=24] |
+| Family | [font=arial]test[/font] |
 | Color | [color=red]test[/color] |
 | Bold | [b]test[/b] |
 | Italic | [i]test[/i] |
 | Underline | [u]test[/u] |
 | Overline | [o]test[/o] |
 | Strikethrough | [s]test[/s] |
+| Typewriter | [typing=0.1]test[/typing] |
+
 
 
 BBCode.html() function
