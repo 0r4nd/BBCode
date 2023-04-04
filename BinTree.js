@@ -1,12 +1,7 @@
 
-
-/**
- * Binary Tree Class
- */
 const [BinTree,BinTreeNode,BinTreeIterator] = (function() {
   "use strict";
 
-  // Utils
   function stringify(node) {
     var data = node.data;
     if (typeof data.toString === "function") {
@@ -15,7 +10,8 @@ const [BinTree,BinTreeNode,BinTreeIterator] = (function() {
     return JSON.stringify(data);
   }
 
-  // Class
+
+  ////////////////////////////////////////////////////////////////////
   function BinTreeNode(data) {
     this.data = data;
     this.parent = null;
@@ -67,7 +63,8 @@ const [BinTree,BinTreeNode,BinTreeIterator] = (function() {
 
 
 
-  // Class
+
+  ////////////////////////////////////////////////////////////////////
   function BinTreeIterator(btree,traverseType="breadthfirst") {
     this.btree = btree;
     this.list = null;
@@ -145,7 +142,7 @@ const [BinTree,BinTreeNode,BinTreeIterator] = (function() {
 
 
 
-  // Class
+  ////////////////////////////////////////////////////////////////////
   function BinTree(data) {
     this.root = null;
     if (data) this.root = new BinTreeNode(data);
@@ -202,8 +199,9 @@ const [BinTree,BinTreeNode,BinTreeIterator] = (function() {
     if (!callback) return null;
     var iter = new BinTreeIterator(this,"preorder");
     while (iter.hasNext()) {
-      if (callback(iter.next(),data)) break;
+      if (callback(iter.next(),data)) return false;
     }
+    return true;
   };
 
 
