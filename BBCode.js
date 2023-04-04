@@ -1,18 +1,48 @@
 
+
 const BBCode = (function() {
 
   const DEBUG = false;
 
+
   /**
    * BBCode main class
    */ 
-  function BBCode(text, bbtags = {}) {
+  function BBCode(text, opts = {}, bbtags = BBCode.TAGS_DEFAULT) {
     this.tree = new Tree();
     this.btree = null;
     this.text = text;
     this.bbtags = bbtags;
+    this.btreeTraverseCompleted = false;
+
+    // context
+    this.canvas = canvas;
+    this.x = opts.x || 10;
+    this.y = opts.y || 10;
+    this.xOrig = this.x;
+    this.yOrig = this.y;
+    this.fontSize = opts.fontSize || 10;
+    this.width = opts.width;
+    this.charsCurrent = 0;
+    this.charsLimit = 35;
+    this.tempo = 0;
+
     this.create();
   }
+
+  // this object is frozen (for prevent bad usage of Object.assign())
+  BBCode.TAGS_DEFAULT = {
+    b:{},
+    i:{},
+    u:{},
+    s:{},
+    o:{},
+    color:{attribute:true},
+    size:{attribute:true},
+    font:{attribute:true},
+  };
+  Object.freeze(BBCode.TAGS_DEFAULT);
+
 
   const skipSpaces = (text,i) => {
     while (i < text.length && (text[i] === " " || text[i] === "\t")) ++i;
@@ -241,31 +271,21 @@ const BBCode = (function() {
     if (DEBUG) this.tree.print();
   };
 
-
+  // kind of "reduce" function
   BBCode.prototype.reduce = function(callback, initialValue) {
     if (typeof callback !== "function") return;
     var currentIndex = 0;
-    this.btree.preorderTraverse((node,data) => {
+    this.btreeTraverseCompleted = this.btree.preorderTraverse((node,data) => {
       var currentValue = node.data;
       if (currentValue.openTag().length > 0) return;
       if (currentValue.section().length === 0) return;
-      initialValue = callback(initialValue, currentValue, currentIndex++);
+      var res = callback(initialValue, currentValue, currentIndex++);
+      if (typeof res === 'undefined') return true; // stop the traverse
+      initialValue = res;
     });
     return initialValue;
   };
 
-  // this object is frozen (for prevent bad usage of Object.assign())
-  BBCode.TAGS_DEFAULT = {
-    b:{},
-    i:{},
-    u:{},
-    s:{},
-    o:{},
-    color:{attribute:true},
-    size:{attribute:true},
-    font:{attribute:true},
-  };
-  Object.freeze(BBCode.TAGS_DEFAULT);
 
 
   // Size: [size=150%]test[/size] or [size=24px]test[/size] 
@@ -300,20 +320,6 @@ const BBCode = (function() {
     return text;
   }
 
-  function bb_to_canvasFont(text, data, ctx) {
-    if (data.tags['b']) text += ' bold';
-    if (data.tags['i']) text += ' italic';
-
-    if (data.tags['size']) text += ' ' + data.tags['size'].attribute;
-    else text += ' ' + ctx.fontSize + 'px';
-    
-    if (data.tags['font']) text += ' ' + data.tags['font'].attribute;
-    else text += ' sans-serif';
-    
-    return text;
-  }
-
-
   function console_callback(ctx,data) {
     var style = ctx.style.concat("");
     var len = style.length-1;
@@ -329,6 +335,18 @@ const BBCode = (function() {
     return ctx;
   };
 
+
+  function html_close_tags(tags) {
+    var s = "";
+    var keys = Object.keys(tags);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      s += "</" + key + ">"
+    }
+    return s;
+  }
+
+
   function html_callback(ctx,data) {
     var parsed = bb_to_html('<span style="', data);
     if (parsed.length > 0) {
@@ -337,46 +355,82 @@ const BBCode = (function() {
     } else {
       ctx += data.text;
     }
+    //console.error(data.tags, html_close_tags(data.tags))
     return ctx;
   };
 
+
+  function bb_to_canvasFont(text, data, ctx) {
+    if (data.tags['b']) text += ' bold';
+    if (data.tags['i']) text += ' italic';
+    if (data.tags['size']) text += ' ' + data.tags['size'].attribute;
+    else text += ' ' + ctx.fontSize + 'px';
+    if (data.tags['font']) text += ' ' + data.tags['font'].attribute;
+    else text += ' sans-serif';
+    return text;
+  }
+
+
+
+
+
+
+
+
   function canvas_callback(ctx,data) {
+    // charLimit
+    ctx.charsLimit += 0.01;
+    if (ctx.charsCurrent > ctx.charsLimit) return ctx;
+
     var canvasCtx = ctx.canvas.getContext("2d");
-    var parsed = bb_to_canvasFont("", data, ctx);
+    canvasCtx.font = bb_to_canvasFont("", data, ctx);
 
     if (data.tags['color']) canvasCtx.fillStyle = data.tags['color'].attribute;
     else canvasCtx.fillStyle = "black";
-    canvasCtx.font = parsed;
-
 
     var words = data.text.split(' ');
-    for (var i = 0; i < words.length; i++) {
-      var word = words[i] + ((i>=words.length-1)?'':' ');
-      if (word.length == 0) continue;
 
-      var width = Math.floor(canvasCtx.measureText(word).width);
-      if (ctx.x + width >= ctx.width) {
+    for (var w = 0; w < words.length; w++) {
+      // word by word
+      var word = words[w] + ((w>=words.length-1)?'':' ');
+      if (word.length == 0) continue;
+      var wordWidth = Math.floor(canvasCtx.measureText(word).width);
+      if (ctx.x + wordWidth >= ctx.width) {
         ctx.x = ctx.xOrig;
         ctx.y += ctx.fontSize;
         if (word == ' ') continue;
       }
-      canvasCtx.fillText(word, ctx.x,ctx.y);
-      ctx.x += width;
+      // char by char
+      for (var c = 0; c < word.length; c++) {
+        var char = word.charAt(c);
+        canvasCtx.fillText(char, ctx.x,ctx.y);
+        ctx.x += Math.floor(canvasCtx.measureText(char).width);
+        ctx.charsCurrent++;
+        if (ctx.charsCurrent > ctx.charsLimit) return ctx;
+      }
+      // for [typewriter]
+      //ctx.charsCurrent++;
+      //if (ctx.charsCurrent > ctx.charsLimit) break;
+      //ctx.x += wordWidth;
     }
+    //ctx.x = ctx.xOrig;
+    //ctx.y = ctx.yOrig;
 
     return ctx;
-  };
+  }
 
   BBCode.parse = function(text, bbtags, callback, ctx) {
     bbtags = bbtags || BBCode.TAGS_DEFAULT;
     var bbcode = new BBCode(text, bbtags);
-    return bbcode.reduce((total,data) => callback(total,data), ctx);
+    return bbcode.reduce((accumulator,data) => callback(accumulator,data), ctx);
   };
 
 
-
   BBCode.log = function(text, callback_log = console.log) {
-    var ctx = {text:"",style:[]};
+    var ctx = {
+      text: "",
+      style: [],
+    };
     BBCode.parse(text, BBCode.TAGS_DEFAULT, console_callback, ctx);
     callback_log(ctx.text, ...ctx.style);
   };
@@ -384,7 +438,7 @@ const BBCode = (function() {
   BBCode.html = function(text) {
     return BBCode.parse(text, BBCode.TAGS_DEFAULT, html_callback, "");
   };
-
+/*
   BBCode.fillCanvas = function(text, canvas, opts={}) {
     var ctx = {
       text: "",
@@ -392,17 +446,34 @@ const BBCode = (function() {
       x: opts.x || 10,
       y: opts.y || 10,
       xOrig: opts.x || 10,
-      yOrig: opts.y || 10,
       fontSize: opts.fontSize || 10,
       width: opts.width || canvas.width,
+      charsCurrent: 0,
+      charsLimit: 35,
+      tempo: 0,
     };
     BBCode.parse(text, BBCode.TAGS_DEFAULT, canvas_callback, ctx);
+  };*/
+
+  BBCode.prototype.parse = function(callback, ctx) {
+    var res = this.reduce((accumulator,data) => callback(accumulator,data), ctx);
+    if (this.btreeTraverseCompleted) {
+      //this.x = this.xOrig;
+      //this.y = this.yOrig;
+    }
+    return res;
+  };
+
+
+  BBCode.prototype.fillCanvas = function() {
+    if (typeof this.width === 'undefined') {
+     this.width = canvas.width;
+    }
+    this.parse(canvas_callback, this);
   };
 
   return BBCode;
 })();
-
-
 
 
 
