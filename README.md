@@ -14,6 +14,7 @@ Standard tags (customisable)
 | Underline | [u]test[/u] |
 | Overline | [o]test[/o] |
 | Strikethrough | [s]test[/s] |
+| Typewriter | [typing=0.1]test[/typing] |
 
 
 
