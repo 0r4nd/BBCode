@@ -7,7 +7,7 @@ Standard tags (customisable)
 | tag             | exemple      |
 |:------------------|:------------|
 | Size | [size=150%]test[/size] or [size=24px]test[/size] |
-| Family | [font=Autumn]test[/font] |
+| Family | [font=arial]test[/font] |
 | Color | [color=red]test[/color] |
 | Bold | [b]test[/b] |
 | Italic | [i]test[/i] |
