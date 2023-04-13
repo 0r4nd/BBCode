@@ -1,6 +1,18 @@
 BBCode parsing library
 =====================
 
+# Implementation status
+### tags:
+- tag [size] ✅<br>
+- tag [font] ✅<br>
+- tag [color] ✅<br>
+- tag [b] ✅<br>
+- tag [i] ✅<br>
+- tag [u] ✅<br>
+- tag [o] ✅<br>
+- tag [s] ✅<br>
+- tag [typing] ⭕ (buggy)<br>
+
 Standard tags (customisable)
 ---------------------
 
